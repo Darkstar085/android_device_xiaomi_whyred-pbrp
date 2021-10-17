@@ -60,10 +60,28 @@ jobs:
              
        - uses: actions/upload-artifact@v2
          with:
-          name: recoveryzip
+          name: releases
           path: work/out/target/product/*/*.zip
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
 
-       - uses: actions/upload-artifact@v2
-         with:
-          name: recoveryimage
-          path: work/out/target/product/*/*.img
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.RELEASE_TOKEN }}
+          ref: android-9.0
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: releases
+
+      - name: debug
+        run: sudo ls
+
+      - name: Release to GH Releases
+        run: sudo -E bash .github/scripts/release.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
